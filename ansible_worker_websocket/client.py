@@ -45,6 +45,8 @@ class WebsocketChannel(object):
 
     def on_error(self, error):
         print('WebsocketChannel on_error', error)
-        self.on_close()
-        gevent.sleep(1)
-        self.start_socket_thread()
+        try:
+            self.on_close()
+        finally:
+            gevent.sleep(1)
+            self.start_socket_thread()
