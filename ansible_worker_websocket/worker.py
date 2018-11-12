@@ -43,6 +43,7 @@ class AnsibleWorker(object):
         self.queue = self.controller.inboxes['default']
         self.thread = gevent.spawn(self.controller.receive_messages)
         self.temp_dir = None
+        self.cancel_requested = False
 
     def trace_order_seq(self):
         return next(self.counter)
@@ -95,7 +96,7 @@ class AnsibleWorker(object):
         self.controller.outboxes['output'].put(messages.RunnerMessage(data))
 
     def cancel_callback(self):
-        return False
+        return self.cancel_requested
 
     def finished_callback(self, runner):
         logger.info('called')

@@ -1,8 +1,5 @@
 
 from gevent_fsm.fsm import State, transitions
-import gevent
-from . import messages
-import random
 
 
 class _Start(State):
@@ -39,13 +36,14 @@ class _Waiting(State):
         controller.changeState(Running)
         controller.context.deploy(message.data)
 
+    def onCancel(self, controller, message_type, message):
+        print("Ignore Cancel before running")
 
 
 Waiting = _Waiting()
 
 
 class _Running(State):
-
 
     @transitions('Completed')
     def onComplete(self, controller, message_type, message):
@@ -57,8 +55,34 @@ class _Running(State):
 
         controller.changeState(Errored)
 
+    def onCancel(self, controller, message_type, message):
+        controller.changeState(Cancelling)
+
 
 Running = _Running()
+
+
+class _Cancelling(State):
+
+    def start(self, controller):
+        print("Cancelling")
+        controller.context.cancel_requested = True
+
+    @transitions('Completed')
+    def onComplete(self, controller, message_type, message):
+
+        controller.changeState(Cancelled)
+
+    @transitions('Errored')
+    def onError(self, controller, message_type, message):
+
+        controller.changeState(Cancelled)
+
+    def onCancel(self, controller, message_type, message):
+        print("Ignore duplicate Cancel")
+
+
+Cancelling = _Cancelling()
 
 
 class _Completed(State):
@@ -70,3 +94,14 @@ class _Completed(State):
 
 
 Completed = _Completed()
+
+
+class _Cancelled(State):
+
+    @transitions('Waiting')
+    def start(self, controller):
+
+        controller.changeState(Waiting)
+
+
+Cancelled = _Cancelled()

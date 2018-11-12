@@ -2,7 +2,8 @@ import websocket
 import json
 import gevent
 import traceback
-from .messages import serialize, Deploy
+from pprint import pprint
+from .messages import serialize, Deploy, Cancel
 
 
 class WebsocketChannel(object):
@@ -37,7 +38,11 @@ class WebsocketChannel(object):
     def on_message(self, message):
         print('WebsocketChannel on_message')
         message = json.loads(message)
-        self.outbox.put(Deploy(message[1]))
+        pprint(message)
+        if message[0] == "deploy":
+            self.outbox.put(Deploy(message[1]))
+        elif message[0] == "cancel":
+            self.outbox.put(Cancel())
 
     def on_close(self):
         print('WebsocketChannel on_close')

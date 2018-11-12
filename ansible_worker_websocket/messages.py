@@ -7,6 +7,7 @@ def serialize(message):
 
 
 Deploy = namedtuple('Deploy', ['data'])
+Cancel = namedtuple('Cancel', [])
 Complete = namedtuple('Complete', [])
 Error = namedtuple('Error', [])
 RunnerStdout = namedtuple('RunnerStdout', ['data'])
